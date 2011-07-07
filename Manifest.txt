@@ -1,0 +1,8 @@
+.autotest
+History.txt
+Manifest.txt
+README.txt
+Rakefile
+bin/skypekit
+lib/skypekit.rb
+test/test_skypekit.rb
