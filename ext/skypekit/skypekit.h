@@ -56,6 +56,8 @@ public:
     void OnMessage(const Message::Ref& message, const bool& changesInboxTimestamp, const Message::Ref& supersedesHistoryMessage, const ConversationRef& conversation);
 
 public:    
+    VALUE rb_SkypeObject;
+    VALUE rb_SkypeMessagesListener;
     MAccount::Ref loginAccount;
     MConversation::Ref currentConversation;
 };

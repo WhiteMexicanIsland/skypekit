@@ -88,7 +88,9 @@ void MSkype::OnMessage(
         Props.append(Message::P_AUTHOR);
         Props.append(Message::P_BODY_XML);
         Values = message->GetProps(Props);
-        //skype_notify_message(); 
+        if (rb_SkypeObject && rb_SkypeMessagesListener && rb_class_of(rb_SkypeMessagesListener) == rb_cSymbol){
+	  rb_funcall(rb_class_of(rb_SkypeMessagesListener), rb_to_id(rb_SkypeMessagesListener), 0);
+        } 
 };
 
 
@@ -137,7 +139,7 @@ skype_initialize(VALUE self, VALUE keypath, VALUE host, VALUE port, VALUE logfil
   if (!keyBody) rb_raise(rb_SkypeError, "not valid ssl key");
   skype->init(keyBody, RSTRING_PTR(host), NUM2INT(port), RSTRING_PTR(logfile));
   skype->start();
-  
+  skype->rb_SkypeObject = self;  
   DATA_PTR(self) = skype;
   return self;
 }
@@ -200,7 +202,6 @@ static VALUE make_conversation_hash(VALUE obj)
 
 static VALUE 
 get_conversation_by_oid(VALUE self, VALUE oid){
- VALUE ret;
  ConversationRef C(NUM2INT(oid));
  if (C){
   return make_conversation_obj(C);
@@ -299,6 +300,14 @@ skype_send_message_by_conversation(VALUE self, VALUE conversation, VALUE message
   return ret;
 }
 
+static VALUE
+skype_messages_listener(VALUE self, VALUE cb) {
+  if (rb_class_of(cb) != rb_cSymbol) rb_raise(rb_eTypeError, "Expected Symbol callback");
+  MSkype *skype = get_skype(self);
+  skype->rb_SkypeMessagesListener = cb;   
+  return Qnil;
+}
+
 static VALUE hello_world(VALUE klass)
 {
   return rb_str_new2("hello world");
@@ -322,6 +331,7 @@ Init_skypekit()
   rb_define_method(rb_Skype, "set_conversation", (ruby_method_vararg)skype_current_conversation, 1);
   rb_define_method(rb_Skype, "send_message", (ruby_method_vararg)skype_send_message, 1);
   rb_define_method(rb_Skype, "send_message_by_conversation", (ruby_method_vararg)skype_send_message_by_conversation, 2);
+  rb_define_method(rb_Skype, "messages_listener", (ruby_method_vararg)skype_messages_listener, 1);
   /******     Skype Conversation CLASS METHODS     ******/
   rb_define_singleton_method(rb_Conversation, "oid", (ruby_method_vararg)get_conversation_by_oid, 1);
   rb_define_method(rb_Conversation, "oid", (ruby_method_vararg)get_conversation_oid, 0);
