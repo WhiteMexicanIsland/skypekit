@@ -3,7 +3,7 @@ require 'mkmf'
 LIBDIR      = Config::CONFIG['libdir']
 INCLUDEDIR  = Config::CONFIG['includedir']
 # TODO: add this like params
-SKYPEKITDIR = "/home/leo/tmp_skype/skypekit-sdk_sdk-3.3.2.31_257682"
+SKYPEKITDIR = "/home/leo/skype/skypekit-sdk_sdk-3.4.1.11_342604"
 
 HEADER_DIRS = [
   # First search /opt/local for macports
