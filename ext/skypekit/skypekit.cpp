@@ -76,11 +76,7 @@ void MSkype::set_current_conversation(const Conversation::Ref& c)
   currentConversation = c;
 }
 
-void MSkype::OnMessage(
-        const Message::Ref& message,
-        const bool& changesInboxTimestamp,
-        const Message::Ref& supersedesHistoryMessage,
-        const Conversation::Ref& conversation)
+void MSkype::OnMessage(const Message::Ref& message)
 {
         int MessageType = message->GetProp(Message::P_TYPE).toInt();
         SEIntList Props;
@@ -88,9 +84,11 @@ void MSkype::OnMessage(
         Props.append(Message::P_AUTHOR);
         Props.append(Message::P_BODY_XML);
         Values = message->GetProps(Props);
+        /*
         if (rb_SkypeObject && rb_SkypeMessagesListener && rb_class_of(rb_SkypeMessagesListener) == rb_cSymbol){
 	  rb_funcall(rb_class_of(rb_SkypeMessagesListener), rb_to_id(rb_SkypeMessagesListener), 0);
         } 
+        */
 };
 
 
@@ -303,8 +301,7 @@ skype_send_message_by_conversation(VALUE self, VALUE conversation, VALUE message
 static VALUE
 skype_messages_listener(VALUE self, VALUE cb) {
   if (rb_class_of(cb) != rb_cSymbol) rb_raise(rb_eTypeError, "Expected Symbol callback");
-  MSkype *skype = get_skype(self);
-  skype->rb_SkypeMessagesListener = cb;   
+  
   return Qnil;
 }
 

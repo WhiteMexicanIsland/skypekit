@@ -53,11 +53,10 @@ public:
     MConversation::Ref get_current_conversation();
     void set_current_conversation(const Conversation::Ref& c);
 
-    void OnMessage(const Message::Ref& message, const bool& changesInboxTimestamp, const Message::Ref& supersedesHistoryMessage, const ConversationRef& conversation);
+    void OnMessage(const Message::Ref& message);
 
 public:    
     VALUE rb_SkypeObject;
-    VALUE rb_SkypeMessagesListener;
     MAccount::Ref loginAccount;
     MConversation::Ref currentConversation;
 };
