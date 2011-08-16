@@ -33,6 +33,8 @@ public:
 
     MConversation(unsigned int oid, SERootObject* root);
     ~MConversation() {}
+    
+    void OnMessage(const Message::Ref& message);
 };
 
 
@@ -47,13 +49,16 @@ public:
 
     // Every time an account object is created, we will return instance of MAccount
     Account* newAccount(int oid) {return new MAccount(oid, this);}
+    Conversation* newConversation(int oid)  {return new MConversation(oid, this);}
+   
     bool loggedIn();
     bool loggedOut();
 
     MConversation::Ref get_current_conversation();
     void set_current_conversation(const Conversation::Ref& c);
 
-    void OnMessage(const Message::Ref& message);
+    MConversation::Refs inbox;
+    void OnConversationListChange(const ConversationRef &conversation, const Conversation::LIST_TYPE &type, const bool &added);
 
 public:    
     VALUE rb_SkypeObject;

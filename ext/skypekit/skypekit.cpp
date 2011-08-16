@@ -76,19 +76,38 @@ void MSkype::set_current_conversation(const Conversation::Ref& c)
   currentConversation = c;
 }
 
-void MSkype::OnMessage(const Message::Ref& message)
+void MConversation::OnMessage(const Message::Ref& message)
 {
-        int MessageType = message->GetProp(Message::P_TYPE).toInt();
-        SEIntList Props;
-        SEIntDict Values;
-        Props.append(Message::P_AUTHOR);
-        Props.append(Message::P_BODY_XML);
-        Values = message->GetProps(Props);
-        /*
-        if (rb_SkypeObject && rb_SkypeMessagesListener && rb_class_of(rb_SkypeMessagesListener) == rb_cSymbol){
-	  rb_funcall(rb_class_of(rb_SkypeMessagesListener), rb_to_id(rb_SkypeMessagesListener), 0);
-        } 
-        */
+  Message::TYPE messageType;
+  message->GetPropType(messageType);
+
+  if (messageType == Message::POSTED_TEXT)
+  {
+    SEIntList propIds;
+    SEIntDict propValues;
+    propIds.append(Message::P_AUTHOR);
+    propIds.append(Message::P_BODY_XML);
+    propValues = message->GetProps(propIds);
+    //TODO: fix this!!!
+    if (propValues[0] != "test4monkey"){
+      Message::Ref reply;
+      this->PostText("This is an automated reply.", reply, false);
+    }
+    //rb_funcall(rb_SkypeObject, rb_intern("callback"), 0);
+  };
+
+};
+
+void MSkype::OnConversationListChange(
+  const ConversationRef &conversation, 
+  const Conversation::LIST_TYPE &type, 
+  const bool &added)
+{
+  // if conversation was added to inbox and was not in there already (just in case..) -> append to our own inbox list
+  if ( (type == Conversation::INBOX_CONVERSATIONS) && (added) && (!inbox.contains(conversation)) )
+  {
+    inbox.append(conversation);
+  };
 };
 
 
@@ -152,6 +171,10 @@ skype_login(VALUE self, VALUE login, VALUE password)
   skype->loginAccount->LoginWithPassword(RSTRING_PTR(password), false, false);
   while (!skype->loggedIn()) { Delay(1); };
  }
+ 
+ skype->GetConversationList(skype->inbox, Conversation::INBOX_CONVERSATIONS);
+ fetch(skype->inbox);
+ 
  return self;
 }
 
@@ -301,7 +324,7 @@ skype_send_message_by_conversation(VALUE self, VALUE conversation, VALUE message
 static VALUE
 skype_messages_listener(VALUE self, VALUE cb) {
   if (rb_class_of(cb) != rb_cSymbol) rb_raise(rb_eTypeError, "Expected Symbol callback");
-  
+  rb_need_block();  
   return Qnil;
 }
 

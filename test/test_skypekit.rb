@@ -31,7 +31,7 @@ class TestSkypekit < Test::Unit::TestCase
     puts "Send message"
     skype.send_message("I am Message!!!")
     skype.send_message_by_conversation(conversation, "Hello from RW!!!")
-    sleep 3
+    sleep 60
     puts "logout"
     skype.logout
     assert_equal 'hello world', skype.hello_world
